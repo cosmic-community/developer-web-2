@@ -1,4 +1,4 @@
-import { WorkExperience } from '@/types'
+import { type WorkExperience } from '@/types'
 
 interface WorkExperienceProps {
   experiences: WorkExperience[]
@@ -7,7 +7,7 @@ interface WorkExperienceProps {
 export default function WorkExperience({ experiences }: WorkExperienceProps) {
   if (!experiences || experiences.length === 0) {
     return (
-      <section id="experience" className="section-padding bg-white">
+      <section id="experience" className="section-padding">
         <div className="container">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Work Experience</h2>
@@ -18,116 +18,117 @@ export default function WorkExperience({ experiences }: WorkExperienceProps) {
     )
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return 'Present'
+    
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      })
+    } catch {
+      return dateString
+    }
+  }
+
+  const formatAchievements = (achievements: string | undefined): string[] => {
+    if (!achievements) return []
+    
+    return achievements
+      .split('\n')
+      .filter(line => line.trim())
+      .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
   }
 
   return (
-    <section id="experience" className="section-padding bg-white">
+    <section id="experience" className="section-padding">
       <div className="container">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Work Experience</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            My professional journey and key accomplishments in web development roles.
+            My professional journey and the roles that have shaped my expertise in software development.
           </p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="space-y-8">
-            {experiences.map((experience, index) => {
-              const jobTitle = experience.metadata?.job_title
-              const companyName = experience.metadata?.company_name
-              const companyWebsite = experience.metadata?.company_website
-              const startDate = experience.metadata?.start_date
-              const endDate = experience.metadata?.end_date
-              const isCurrent = experience.metadata?.current
-              const description = experience.metadata?.description
-              const achievements = experience.metadata?.achievements
-              const technologies = experience.metadata?.technologies
+        <div className="max-w-4xl mx-auto space-y-8">
+          {experiences.map((experience) => {
+            const jobTitle = experience.metadata?.job_title
+            const companyName = experience.metadata?.company_name
+            const companyWebsite = experience.metadata?.company_website
+            const startDate = experience.metadata?.start_date
+            const endDate = experience.metadata?.end_date
+            const isCurrent = experience.metadata?.current
+            const description = experience.metadata?.description
+            const achievements = experience.metadata?.achievements
+            const technologies = experience.metadata?.technologies
 
-              return (
-                <div key={experience.id} className="relative">
-                  {/* Timeline line */}
-                  {index < experiences.length - 1 && (
-                    <div className="absolute left-4 top-12 w-0.5 h-full bg-gray-200"></div>
-                  )}
-                  
-                  {/* Timeline dot */}
-                  <div className={`absolute left-2 top-6 w-4 h-4 rounded-full ${
-                    isCurrent ? 'bg-primary-600' : 'bg-gray-400'
-                  }`}></div>
-
-                  {/* Content */}
-                  <div className="ml-12 card p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                          {jobTitle}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          {companyWebsite ? (
-                            <a
-                              href={companyWebsite}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-600 hover:text-primary-700 font-medium"
-                            >
-                              {companyName}
-                            </a>
-                          ) : (
-                            <span className="text-primary-600 font-medium">
-                              {companyName}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2 md:mt-0">
-                        <span className="text-sm text-gray-600">
-                          {startDate ? formatDate(startDate) : 'Start Date'} - {
-                            isCurrent ? 'Present' : endDate ? formatDate(endDate) : 'End Date'
-                          }
-                        </span>
-                        {isCurrent && (
-                          <span className="bg-green-100 text-green-800 px-2 py-1 text-xs font-medium rounded-full">
-                            Current
-                          </span>
+            return (
+              <div key={experience.id} className="card p-8">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      {jobTitle}
+                    </h3>
+                    {companyName && (
+                      <div className="text-lg font-semibold text-primary-600 mb-2">
+                        {companyWebsite ? (
+                          <a 
+                            href={companyWebsite}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-primary-700 transition-colors"
+                          >
+                            {companyName}
+                          </a>
+                        ) : (
+                          companyName
                         )}
-                      </div>
-                    </div>
-
-                    {description && (
-                      <p className="text-gray-600 mb-4">
-                        {description}
-                      </p>
-                    )}
-
-                    {achievements && (
-                      <div className="mb-4">
-                        <h4 className="font-medium text-gray-900 mb-2">Key Achievements:</h4>
-                        <div className="text-gray-600">
-                          {achievements.split('\n').map((achievement, i) => (
-                            <p key={i} className="mb-1">
-                              {achievement}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {technologies && (
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Technologies:</h4>
-                        <p className="text-gray-600 text-sm">
-                          {technologies}
-                        </p>
                       </div>
                     )}
                   </div>
+                  <div className="text-gray-600 font-medium">
+                    {formatDate(startDate)} - {isCurrent ? 'Present' : formatDate(endDate)}
+                  </div>
                 </div>
-              )
-            })}
-          </div>
+
+                {description && (
+                  <p className="text-gray-700 mb-4 leading-relaxed">
+                    {description}
+                  </p>
+                )}
+
+                {achievements && formatAchievements(achievements).length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">Key Achievements:</h4>
+                    <ul className="list-disc list-inside space-y-1">
+                      {formatAchievements(achievements).map((achievement, index) => (
+                        <li key={index} className="text-gray-700">
+                          {achievement}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {technologies && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Technologies Used:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {technologies.split(',').map((tech, index) => (
+                        <span 
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                        >
+                          {tech.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
